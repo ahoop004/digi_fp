@@ -2,14 +2,6 @@
 
 Synthetic lensing demo with forward modeling and regularized inversion.
 
-## Running the static demo
-
-```bash
-python -m synthetic_lensing.synthetic_demo_static
-```
-
-This renders a 2×3 grid: true source, lensed clean/noisy images, naive and Tikhonov reconstructions, and residuals. MSE is shown in the titles.
-
 ## Running the interactive Dash app
 
 ```bash

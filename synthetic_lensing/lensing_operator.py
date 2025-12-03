@@ -67,7 +67,7 @@ class LensingOperator:
 
     def __post_init__(self) -> None:
         self._build_index_map()
-        self._build_matrix()
+        self.A = None  # built lazily to avoid large dense allocations
 
     def _build_index_map(self) -> None:
         beta_x, beta_y = self.lens.map_to_source(self.image_grid.X, self.image_grid.Y)
@@ -118,4 +118,6 @@ class LensingOperator:
         return d.reshape(n_img, n_img)
 
     def as_matrix(self) -> np.ndarray:
+        if self.A is None:
+            self._build_matrix()
         return self.A
