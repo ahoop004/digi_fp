@@ -611,7 +611,7 @@ def make_app() -> Dash:
 
     app.layout = html.Div(
         [
-            html.H2("Synthetic Gravitational Lensing"),
+            html.H2("Gravitational Lensing"),
             html.Div(
                 [controls_column1, controls_column2, plots],
                 style={
