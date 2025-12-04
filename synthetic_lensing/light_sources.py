@@ -4,7 +4,6 @@ import numpy as np
 
 
 class LightProfile(ABC):
-    """Abstract light profile on the source or lens plane."""
 
     @abstractmethod
     def evaluate(self, BX: np.ndarray, BY: np.ndarray) -> np.ndarray:  # pragma: no cover - interface

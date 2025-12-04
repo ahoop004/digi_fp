@@ -46,20 +46,20 @@ if _HAS_NUMBA:
         return out.reshape((n_img, n_img))
 
 
-@dataclass
-class RayTracer:
-    """Compute source-plane coordinates for each image-plane pixel."""
+# @dataclass
+# class RayTracer:
 
-    image_grid: Grid2D
-    lens: BaseLensModel
 
-    def beta(self) -> tuple[np.ndarray, np.ndarray]:
-        return self.lens.map_to_source(self.image_grid.X, self.image_grid.Y)
+#     image_grid: Grid2D
+#     lens: BaseLensModel
+
+#     def beta(self) -> tuple[np.ndarray, np.ndarray]:
+#         return self.lens.map_to_source(self.image_grid.X, self.image_grid.Y)
 
 
 @dataclass
 class LensingOperator:
-    """Discrete lensing operator mapping source pixels to image pixels."""
+
 
     image_grid: Grid2D
     source_grid: Grid2D
@@ -67,7 +67,7 @@ class LensingOperator:
 
     def __post_init__(self) -> None:
         self._build_index_map()
-        self.A = None  # built lazily to avoid large dense allocations
+        self.A = None
 
     def _build_index_map(self) -> None:
         beta_x, beta_y = self.lens.map_to_source(self.image_grid.X, self.image_grid.Y)
@@ -91,9 +91,8 @@ class LensingOperator:
             iy = ((beta_y_flat - by_min) / (by_max - by_min) * (n_src - 1)).astype(int)
             self._ix_src = np.clip(ix, 0, n_src - 1)
             self._iy_src = np.clip(iy, 0, n_src - 1)
-            # Flattened source index for quick gathering
             self._src_indices = self._iy_src * n_src + self._ix_src
-        # Counts per source pixel (for ATA diagonal)
+            
         self._counts = np.bincount(self._src_indices, minlength=n_src * n_src).astype(float)
 
     def _build_matrix(self) -> None:
@@ -109,7 +108,6 @@ class LensingOperator:
     def forward(self, source_2d: np.ndarray) -> np.ndarray:
         s = source_2d.ravel()
         n_img = self.image_grid.n_pix
-        # Use direct gather when index map is available
         if hasattr(self, "_src_indices"):
             if _HAS_NUMBA:
                 return _gather_forward(s, self._src_indices, n_img)

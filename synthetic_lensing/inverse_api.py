@@ -9,7 +9,6 @@ from synthetic_lensing.lensing_operator import LensingOperator
 
 
 class InverseMethod(ABC):
-    """Abstract inverse solver."""
 
     @abstractmethod
     def reconstruct(self, data_image: np.ndarray, operator: LensingOperator, regularizer=None, **kwargs) -> Tuple[np.ndarray, np.ndarray]:

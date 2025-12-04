@@ -5,7 +5,7 @@ import numpy as np
 
 
 class BaseLensModel(ABC):
-    """Abstract base for lens mass models."""
+
 
     @abstractmethod
     def deflection(self, theta_x: np.ndarray, theta_y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -54,7 +54,7 @@ class SIELens(BaseLensModel):
         phi = np.deg2rad(self.phi_deg)
         cosphi, sinphi = np.cos(phi), np.sin(phi)
 
-        # Rotate into principal frame
+
         x_p = cosphi * dx + sinphi * dy
         y_p = -sinphi * dx + cosphi * dy
 
@@ -67,7 +67,7 @@ class SIELens(BaseLensModel):
         alpha_x_p = alpha_r * x_p / r_safe
         alpha_y_p = alpha_r * (y_p / q_clipped**2) / r_safe
 
-        # Rotate deflection back to sky frame
+
         alpha_x = cosphi * alpha_x_p - sinphi * alpha_y_p
         alpha_y = sinphi * alpha_x_p + cosphi * alpha_y_p
         return alpha_x, alpha_y

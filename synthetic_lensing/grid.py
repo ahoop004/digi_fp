@@ -5,7 +5,6 @@ import numpy as np
 
 @dataclass
 class Grid2D:
-    """2D coordinate grid with reusable mesh and extent."""
 
     n_pix: int
     fov: float

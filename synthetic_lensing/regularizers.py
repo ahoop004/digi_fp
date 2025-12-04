@@ -9,7 +9,6 @@ except ImportError:
 
 
 def build_laplacian_regularizer(n_pix: int):
-    """Construct 5-point Laplacian regularizer matrix."""
     N = n_pix * n_pix
     if _HAS_SCIPY:
         data = []

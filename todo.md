@@ -1,5 +1,138 @@
-## TODO
 
-- [ ] Refactor the forward pipeline into composable modules (sources, lensing operator, transforms) with clearer boundaries.
-- [ ] Unify inverse solvers under a single interface and keep hooks for adding new regularizers/priors.
-- [ ] Add lightweight docs in `README.md` for the mask controls and lens-light lock to help users navigate the GUI.
+## Extended imaging pipeline
+
+- [ ] Core infrastructure
+  - [ ] Image I/O and formats
+    - [ ] Load/save: FITS (`astropy.io.fits`), TIFF/PNG/JPEG for visualizations
+    - [ ] Metadata handling: WCS info (pixel → RA/Dec mappings), exposure time, filter/band, instrument, etc.
+    - [ ] Batch loaders for image cubes or multi-band data (e.g., ugriz, RGB, etc.)
+  - [ ] Basic image utilities
+    - [ ] Resizing, cropping, padding
+    - [ ] Bit-depth conversions (float ↔ 8/16-bit)
+    - [ ] Normalization and scaling (min–max, z-score, asinh/log stretch for astronomy)
+    - [ ] Coordinate transforms: pixel ↔ sky, sub-image cutouts from WCS footprint
+- [ ] Synthetic image generation (Sources + Scenes)
+  - [ ] Analytic source models
+    - [ ] Point sources (stars) modeled as delta functions or PSF samples
+    - [ ] Extended sources (galaxies): 2D Gaussian / elliptical Gaussian; Sersic profiles (n = 1, n = 4, general n); disks + bulges combinations
+  - [ ] Scene generation
+    - [ ] Random star fields (density, brightness distribution)
+    - [ ] Simple galaxy fields (few big, many faint, random orientations)
+    - [ ] Multi-band synthetic scenes (different Sersic parameters per band)
+  - [ ] Background fields
+    - [ ] Smooth gradients (zodiacal/sky)
+    - [ ] Structured backgrounds (nebula-like via Perlin/filtered noise)
+- [ ] Instrument / Optics Modeling
+  - [ ] Point Spread Function (PSF)
+    - [ ] Simple: Gaussian
+    - [ ] Moffat (ground-based seeing)
+    - [ ] Airy disk approximation (ideal circular aperture)
+    - [ ] Anisotropic PSFs (elliptical, defocus/astigmatism-like)
+  - [ ] Optical distortions and mapping
+    - [ ] Geometric distortions: barrel/pincushion, polynomial distortions
+    - [ ] Pixel scale & orientation: resampling to different pixel scales
+  - [ ] Detector effects
+    - [ ] PRNU
+    - [ ] Blooming/saturation (bright stars bleeding along columns)
+    - [ ] Defective pixels (hot/dead pixels, column defects)
+- [ ] Degradation and Noise Models
+  - [ ] Noise: Gaussian, Poisson, mixed (signal-dependent + additive), salt-and-pepper/impulse, correlated noise
+  - [ ] Photometric artifacts
+    - [ ] Bias level, dark current (additive offsets/patterns)
+    - [ ] Flat-field effects (multiplicative gain variations)
+  - [ ] Blur and motion
+    - [ ] Motion blur (tracking errors)
+    - [ ] Out-of-focus blur (defocus kernel)
+- [ ] Preprocessing and Calibration (Editing Layer)
+  - [ ] Calibration steps: bias/dark subtraction; flat-field correction; bad pixel/cosmic ray masking and interpolation
+  - [ ] Background estimation & subtraction: local background maps; global polynomial/spline fits
+  - [ ] Intensity transforms: linear, logarithmic, gamma, power-law, asinh stretch; histogram equalization; CLAHE; clipping/dynamic range compression for display
+- [ ] Filtering and Enhancement
+  - [ ] Spatial-domain filters: box, Gaussian, median; Laplacian, unsharp masking, high-boost; anisotropic diffusion; bilateral / non-local means
+  - [ ] Frequency-domain filters: FFT-based ideal/Butterworth/Gaussian low/high/band/notch
+  - [ ] Multi-scale methods: Gaussian/Laplacian pyramids; wavelet-based denoising; multi-scale decomposition for faint structures
+- [ ] Registration, Alignment, and Stacking
+  - [ ] Image registration
+    - [ ] Feature-based: detect sources → match (RANSAC/NN); estimate rigid/affine transforms
+    - [ ] Frequency-domain: phase correlation for sub-pixel shifts
+  - [ ] Stacking/compositing
+    - [ ] Mean / median combine; sigma-clipped mean
+    - [ ] HDR-like compositing (combine exposures)
+- [ ] Segmentation, Masking, and Object Detection
+  - [ ] Source detection
+    - [ ] Thresholding (global, Otsu, adaptive)
+    - [ ] Connected components after thresholding
+    - [ ] Morphological ops (erosion/dilation/opening/closing)
+  - [ ] Star/galaxy separation heuristics: shape parameters (FWHM, ellipticity); surface brightness vs. size
+  - [ ] Masks: star masks, cosmic ray masks, region-of-interest masks
+- [ ] Restoration and Reconstruction
+  - [ ] Deconvolution (PSF-based restoration)
+    - [ ] Inverse filtering (with regularization)
+    - [ ] Wiener filtering
+    - [ ] Richardson–Lucy deconvolution
+    - [ ] Regularized deconvolution: Tikhonov (L2), Total Variation (TV)
+  - [ ] Super-resolution / resolution enhancement
+    - [ ] Multiple low-res observations → super-res (shift-and-add, iterative)
+  - [ ] Inpainting
+    - [ ] Fill missing data: masked regions, bad columns
+    - [ ] PDE-based or patch-based methods
+  - [ ] Specialized reconstruction modules
+    - [ ] Gravitational lensing reconstruction: lens/source grids, forward model, inverse reconstruction (Tikhonov, RL-style), deblending overlapping sources
+- [ ] Analysis and Measurement Tools
+  - [ ] Photometry
+    - [ ] Aperture photometry: circular/elliptical apertures, annulus backgrounds
+    - [ ] PSF photometry: fit PSF model, estimate flux/centroid
+    - [ ] Surface brightness profiles: radial profiles; 2D model fitting (e.g., Sersic)
+  - [ ] Shape and morphology
+    - [ ] Second-moment-based shape measures (ellipticity, orientation)
+    - [ ] Concentration/asymmetry/clumpiness (CAS)
+    - [ ] Isophote fitting and contour extraction
+  - [ ] Diagnostic plots
+    - [ ] Histograms of intensities, S/N distributions
+    - [ ] Power spectra / spatial frequency content
+    - [ ] Residual maps (data − model) with statistics
+- [ ] Visualization and UI
+  - [ ] Visualization
+    - [ ] Linear and stretched displays (log/asinh), adjustable black/white levels
+    - [ ] Zoom/pan, crosshair, pixel value readout
+    - [ ] Multi-panel comparison: original vs degraded vs reconstructed; different bands side-by-side
+  - [ ] Overlays
+    - [ ] Contours over images
+    - [ ] Object markers (detected sources, masks)
+    - [ ] Vector fields for distortions or displacement
+  - [ ] Pipelines
+    - [ ] Simple configuration system (YAML/JSON) to define simulation/processing pipelines
+    - [ ] Logging and saving intermediate images for reproducibility
+- [ ] “Nice-to-have” Advanced / Research-Oriented Features
+  - [ ] Machine-learning-based denoising (e.g., DnCNN-like; plug-in block)
+  - [ ] ML-based segmentation (star/galaxy/artifact classifiers)
+  - [ ] Bayesian inference framework for reconstruction (priors on source, PSF, noise)
+  - [ ] Integration with real survey data (HST, JWST, LSST-like): helper functions to download and preprocess cutouts
+  - [ ] Gravitational lens modeling GUI: adjust lens parameters, visualize lensed arcs/caustics/critical curves, overlay reconstruction residuals
+
+---
+
+## 12. Forward model realism and reconstruction extensions (new tasks)
+
+- [ ] Make the forward model explicit as `y = A x + n` with factorization `A = M P D L`; map UI panels to each stage (true source `x`, lensed `Lx`, blurred/noisy `PDLx + n`, filtered, masked `M(PDLx+n)`, reconstruction).
+- [ ] Forward simulation: multiple dithered exposures
+  - [ ] Simulate `N` exposures with sub-pixel shifts/rotations; per exposure apply lens `L`, detector sampling `D_k`, PSF `P`, then noise/cosmic rays.
+- [ ] PSF / blur stage
+  - [ ] Implement adjustable PSF (circular/elliptical Gaussian FWHM, later Airy/realistic) as 2-D convolution separate from noise.
+- [ ] Noise model
+  - [ ] Poisson on signal+background; Gaussian read noise; cosmic rays (rare spikes/streaks).
+- [ ] Reduction pipeline realism
+  - [ ] Cosmic-ray/outlier rejection: local median/gaussian filtering + deviation threshold; sigma-clipped stacking across frames with configurable sigma.
+  - [ ] Drizzle-style resampling: choose finer output pixel scale; map dithered frames with shift/rotation; pixfrac/drop size; kernels (nearest/bilinear/Gaussian); output drizzled image for reconstruction.
+- [ ] Reconstruction modes beyond Tikhonov
+  - [ ] Add Richardson–Lucy deconvolution (iteration slider, optional damping/stop criteria).
+  - [ ] Add Wiener/frequency-domain reconstruction (compare to naive inverse).
+  - [ ] Allow switching regularizers (Tikhonov/TV/gradient) and plot residual norms/regularization term; optional L-curve view.
+- [ ] Masks and detector issues
+  - [ ] Simulate bad pixels/columns, chip gaps, vignetting, saturation halos; show mask map and overlay.
+- [ ] Metrics / residuals
+  - [ ] Compute image-plane metrics (chi², PSNR/SNR, SSIM); source-plane error norms/maps; residual image `y - A x_hat` and histogram.
+- [ ] References / benchmarking
+  - [ ] Review lenstronomy/deeplenstronomy configs as feature checklists (no direct dependency).
+- [ ] Implementation order
+  - [ ] Add multi-exposure + PSF + realistic noise first; then sigma-clipped stacking + Drizzle; then RL/Wiener; then enrich masks/metrics.

@@ -5,7 +5,6 @@ import numpy as np
 
 @dataclass
 class GaussianSource:
-    """Analytic elliptical Gaussian surface brightness model."""
 
     I0: float = 1.0
     beta0_x: float = 0.0
@@ -15,7 +14,7 @@ class GaussianSource:
     phi_deg: float = 0.0
 
     def evaluate(self, BX: np.ndarray, BY: np.ndarray) -> np.ndarray:
-        """Evaluate brightness on provided beta-plane coordinates."""
+
         dx = BX - self.beta0_x
         dy = BY - self.beta0_y
 
@@ -23,11 +22,10 @@ class GaussianSource:
         cosphi = np.cos(phi)
         sinphi = np.sin(phi)
 
-        # Rotate into principal axes of the Gaussian
+
         x_p = cosphi * dx + sinphi * dy
         y_p = -sinphi * dx + cosphi * dy
 
-        # Guard against non-positive sigmas
         sig_maj = max(self.sigma_major, 1e-6)
         sig_min = max(self.sigma_minor, 1e-6)
 

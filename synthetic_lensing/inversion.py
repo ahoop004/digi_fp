@@ -93,7 +93,7 @@ class NaiveUnshooter:
 
 @dataclass
 class TikhonovInversion:
-    """Tikhonov inversion with optional regularizer."""
+
 
     operator: LensingOperator
     lambda_reg: float = 1e-2
@@ -103,7 +103,6 @@ class TikhonovInversion:
         n_src = self.operator.source_grid.n_pix
         N_src2 = n_src * n_src
 
-        # ATd via gather
         d_flat = data_image.ravel()
         ATd = np.bincount(self.operator._src_indices, weights=d_flat, minlength=N_src2).astype(float)
 
@@ -118,7 +117,7 @@ class TikhonovInversion:
                 if info != 0:
                     s_hat = spla.spsolve(M, ATd)
             except TypeError:
-                # Fallback for SciPy variants: directly solve
+                
                 s_hat = spla.spsolve(M, ATd)
         else:
             if self.R is None:

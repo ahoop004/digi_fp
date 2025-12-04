@@ -12,17 +12,16 @@ from synthetic_lensing.regularizers import build_laplacian_regularizer
 
 try:
     import scipy.ndimage as ndi
-except ImportError:  # pragma: no cover - optional
+except ImportError:  
     ndi = None
 
-# Caches shared across forward/inverse
+
 _GRID_CACHE: dict[tuple[int, float], Grid2D] = {}
 _OP_CACHE: dict[tuple, LensingOperator] = {}
 _REG_CACHE: dict[int, object] = {}
 
 
 def _lens_key(n_pix: int, fov: float, lens: BaseLensModel) -> tuple:
-    # Round to avoid tiny float differences creating new keys
     if hasattr(lens, "q"):
         return (
             lens.__class__.__name__,
@@ -70,7 +69,7 @@ def get_regularizer(n_pix: int):
 class SourceModel:
     """Interface for source models."""
 
-    def evaluate(self, grid: Grid2D) -> np.ndarray:  # pragma: no cover - interface
+    def evaluate(self, grid: Grid2D) -> np.ndarray:
         raise NotImplementedError
 
 
@@ -115,7 +114,7 @@ class ImageSourceModel(SourceModel):
 class Transform:
     """Base class for image-plane transforms."""
 
-    def apply(self, image: np.ndarray) -> np.ndarray:  # pragma: no cover - interface
+    def apply(self, image: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
 
@@ -134,7 +133,6 @@ class NoiseTransform(Transform):
 
 @dataclass
 class PoissonNoiseTransform(Transform):
-    """Poisson noise based on image values (expects non-negative)."""
 
     rng: Optional[np.random.Generator] = None
 
@@ -146,7 +144,6 @@ class PoissonNoiseTransform(Transform):
 
 @dataclass
 class NormalizeTransform(Transform):
-    """Scale image to unit max if possible."""
 
     eps: float = 1e-8
 
@@ -179,7 +176,6 @@ class MaskTransform(Transform):
 
 @dataclass
 class ForwardModel:
-    """Composable forward model."""
 
     n_pix: int
     fov: float
